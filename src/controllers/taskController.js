@@ -4,8 +4,9 @@ const sendResponse = require('../utils/response');
 const TaskSorter = require('../utils/taskSorter')
 const TaskHelper = require('../helpers/taskHelper');
 const {priority} = require('../enums/priority')
-let tasks = require('../../models/task.json');
 const logger = require('../logger');
+const { NotFoundError, ValidationError } = require('../exceptions/customErrors');
+let tasks = require('../../models/task.json');
 
 // Get all tasks
 const getAllTasks = (req, res) => {
@@ -24,8 +25,7 @@ const getAllTasks = (req, res) => {
         sendResponse(res, 200, sortedTasks);
     }
     catch(error){
-        logger.error('Error Getting Tasks:', error);
-        sendResponse(res, 500, {message: 'Internal Server Error'});
+        next(error);
     }
 };
 
@@ -37,15 +37,13 @@ const getTaskById = (req, res) => {
 
         if (!task) {
             logger.info('Task with Task ID: ', taskId," not found");
-            sendResponse(res, 404, { message: 'Task not found' });
-            return;
+            throw new NotFoundError('Task with Task ID: ', taskId,' not found')
         }
         logger.info('Task: ', task, ' with Task Id: ', taskId, " retrieved successfully");
         sendResponse(res, 200, task);
     }
     catch(error){
-        logger.error('Error Getting Tasks:', error);
-        sendResponse(res, 500, {message: 'Internal Server Error'});
+        next(error);
     }
 };
 
@@ -56,8 +54,7 @@ const createTask = (req, res) => {
 
         if (error) {
             logger.error('Invalid Task Creation Request', error.details[0].message);
-            sendResponse(res, 400, { message: error.details[0].message });
-            return;
+            throw new ValidationError(error.details[0].message);
         }
 
         const newTask = new Task(
@@ -73,8 +70,7 @@ const createTask = (req, res) => {
         sendResponse(res, 201, newTask);
     }
     catch(error){
-        logger.error('Error Creating Task', error);
-        sendResponse(res, 500, {message: 'Internal Server Error'});
+        next(error);
     }
 };
 
@@ -86,16 +82,14 @@ const updateTask = (req, res) => {
 
         if (!task) {
             logger.info('Task with Task ID: ', taskId," not found") 
-            sendResponse(res, 404, { message: 'Task not found' });
-            return;
+            throw new NotFoundError('Task with Task ID: ', taskId,' not found')
         }
 
         const { error } = taskValidator(req.body);
 
         if (error) {
             logger.error('Error Occured - '. error);
-            sendResponse(res, 400, { message: error.details[0].message });
-            return;
+            throw new ValidationError(error.details[0].message);
         }
 
         task.title = req.body.title;
@@ -107,8 +101,7 @@ const updateTask = (req, res) => {
         sendResponse(res, 200, task);
     }
     catch(error){
-        logger.error('Error Creating Task', error);
-        sendResponse(res, 500, {message: 'Internal Server Error'});
+        next(error);
     }
 };
 
@@ -120,16 +113,14 @@ const deleteTask = (req, res) => {
 
         if (taskIndex === -1) {
             logger.info('Task with Task ID: ', taskId," not found") 
-            sendResponse(res, 404, { message: 'Task not found' });
-            return;
+            throw new NotFoundError('Task with Task ID: ', taskId,' not found')
         }
 
         tasks.splice(taskIndex, 1);
         sendResponse(res, 200, { message: 'Task deleted' });
     }
     catch(error){
-        logger.error('Error Creating Task', error);
-        sendResponse(res, 500, {message: 'Internal Server Error'});
+        next(error);
     }
 };
 
