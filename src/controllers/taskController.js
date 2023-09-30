@@ -4,7 +4,7 @@ const sendResponse = require('../utils/response');
 const TaskSorter = require('../utils/taskSorter')
 const TaskHelper = require('../helpers/taskHelper');
 const {priority} = require('../enums/priority')
-let tasks = require('../task.json');
+let tasks = require('../models/task.json');
 const logger = require('../logger');
 
 // Get all tasks
