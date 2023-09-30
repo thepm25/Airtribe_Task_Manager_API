@@ -2,9 +2,12 @@ const Task = require('../models/task');
 const taskValidator = require('../validators/taskValidator');
 const sendResponse = require('../utils/response');
 let tasks = require('../task.json');
+const TaskSorter = require('../utils/taskSorter')
+const {priority} = require('../models/priority')
 
 // Get all tasks
 const getAllTasks = (req, res) => {
+    const sortedTasks = TaskSorter.sortByCreatedAtDesc(tasks);
   sendResponse(res, 200, tasks);
 };
 
@@ -39,6 +42,7 @@ const createTask = (req, res) => {
   );
 
   tasks.push(newTask);
+  const sortedTasks = TaskSorter.sortByPriority(tasks, Object.values(Priority));
   sendResponse(res, 201, newTask);
 };
 
