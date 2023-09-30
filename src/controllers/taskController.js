@@ -1,14 +1,21 @@
 const Task = require('../models/task');
 const taskValidator = require('../validators/taskValidator');
 const sendResponse = require('../utils/response');
-let tasks = require('../task.json');
 const TaskSorter = require('../utils/taskSorter')
+const TaskHelper = require('../helpers/taskHelper');
 const {priority} = require('../models/priority')
+let tasks = require('../task.json');
 
 // Get all tasks
 const getAllTasks = (req, res) => {
-    const sortedTasks = TaskSorter.sortByCreatedAtDesc(tasks);
-  sendResponse(res, 200, tasks);
+    const {completed, sort} = req.query;
+    let filteredTasks = tasks;
+    
+    filteredTasks = TaskHelper.filterTasksByCompletion(filteredTasks, completed);
+    filteredTasks = TaskHelper.sortTasksByCreatedAt(filteredTasks, sort);
+
+    const sortedTasks = TaskSorter.sortByCreatedAtDesc(filteredTasks);
+  sendResponse(res, 200, sortedTasks);
 };
 
 // Get a task by ID
