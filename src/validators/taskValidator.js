@@ -1,4 +1,4 @@
-const { Priority } = require('../models/priority');
+const { Priority } = require('../enums/priority');
 
 const validateTask = (task) => {
   const schema = Joi.object({
